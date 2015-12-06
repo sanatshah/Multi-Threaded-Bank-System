@@ -2,8 +2,10 @@
 #include<string.h>    
 #include<sys/socket.h>    
 #include<arpa/inet.h> 
+#include "account.c" 
+#include "utils.h"
 
-char* checkMessage(char message[]);
+int checkMessage(char message[]);
  
 int main(int argc , char *argv[])
 {
@@ -30,18 +32,34 @@ int main(int argc , char *argv[])
 	}
      
 	printf("Connected to server...\n");
-     
+
+	//prepare struct for sending data to server 
+	dataInfo info = (dataInfo) malloc(sizeof(dataInfo));
+	info->acctPtr = NULL;
+	info->command=(char*) malloc(100);
+    	strcpy(info->command, "testing data serialization"); 
+	info->message= NULL;
+
+	unsigned char* data=NULL;
+
 	//keep communicating with server
 	while(1)
 	{
 		printf("> ");
 
 		fgets(message,100, stdin);
-		checkMessage(message);
-		
-         
+
+		if(!checkMessage(message)) 
+		{
+			puts("Please enter proper syntax."); 
+			continue;
+		} 
+	
+		data=(unsigned char*) malloc(sizeof(struct dataInfo)); 	
+		memcpy(data, info, sizeof(struct dataInfo));
+        	printf("sizeof data = %zu\n",sizeof(data)); 
 		//Send command to server
-		if( send(sock , message , strlen(message) , 0) < 0)
+		if( send(sock , data , sizeof(struct dataInfo) , 0) < 0)
 		{
 			puts("Send failed");
 			return 1;
@@ -62,13 +80,43 @@ int main(int argc , char *argv[])
 	return 0;
 }
 
-char* checkMessage(char message[]){
+int checkMessage(char message[]){
 
 	char mess[100];
 	strcpy(mess,message);
 	char* command; 
 	command = strtok(mess," "); 
-	printf("first word is: %s\n",command);
 
-	return command;
+ 	char open[50];
+ 	strcpy(open, "open");
+
+ 	char start[50];
+ 	strcpy(start, "start");
+
+ 	char credit[50];
+ 	strcpy(credit, "credit");
+
+ 	char debit[50];
+ 	strcpy(debit, "debit");
+
+ 	char balance[50];
+ 	strcpy(balance, "balance");
+
+ 	char finish[50];
+ 	strcpy(finish, "finish");
+
+ 	char exit[50];
+ 	strcpy(exit, "exit");
+
+	int check=0;
+
+	if ((strcmp(command,open)==0)||(strcmp(command,start)==0)||(strcmp(command,credit)==0)||(strcmp(command,debit)==0)||(strcmp(command,balance)==0)||(strcmp(command,finish)==0)||(strcmp(command,exit)==0)) 
+		check=1;
+
+	if (check) 
+		return 1;
+	else 
+		return 0;
+
+	return 0;
 }
