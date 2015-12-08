@@ -1,9 +1,6 @@
-new accounts cannot be opened while bank is printing 
-signals 
+send finish command to server when exited
 truncate float
 adding floasts
-client program connect attempts 
-client connect command line 
 characters 100 
 start same account on two different clients
 asynchronous

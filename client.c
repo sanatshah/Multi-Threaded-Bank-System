@@ -1,4 +1,6 @@
 #include<stdio.h> 
+#include <stdlib.h>
+#include<signal.h>
 #include<string.h>    
 #include<sys/socket.h>    
 #include<arpa/inet.h> 
@@ -33,12 +35,25 @@ int main(int argc , char *argv[])
 	server.sin_port = htons( 8888 );
  
 	//Connect to remote server
-	if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
-	{
- 		perror("connect failed. Error");
-		return 1;
+	int connectTime=0;
+	while (1){
+		if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
+		{
+			connectTime++;
+ 			perror("Error");
+			printf("Trying to reconnect...\n");
+			sleep(5);
+
+			if (connectTime==10) 
+				exit(1);
+
+		}else {
+
+		break;
+
+		}
 	}
-     
+ 
 	printf("Connected to server...\n");
 
 	//create buffer of information to be sent to server 
@@ -185,12 +200,14 @@ int checkMessage(char message[]){
  	char finish[50];
  	strcpy(finish, "finish");
 
- 	char exit[50];
- 	strcpy(exit, "exit");
+ 	char exit2[50];
+ 	strcpy(exit2, "exit");
+	if (strncmp(command,exit2,4)==0)
+		exit(1);
 
 	int check=0;
 
-	if ((strcmp(command,open)==0)||(strcmp(command,start)==0)||(strcmp(command,credit)==0)||(strcmp(command,debit)==0)||(strncmp(command,balance,7)==0)||(strcmp(command,finish)==0)||(strcmp(command,exit)==0)) 
+	if ((strcmp(command,open)==0)||(strcmp(command,start)==0)||(strcmp(command,credit)==0)||(strcmp(command,debit)==0)||(strncmp(command,balance,7)==0)||(strcmp(command,finish)==0)||(strcmp(command,exit2)==0)) 
 		check=1;
 
 	if (check) 

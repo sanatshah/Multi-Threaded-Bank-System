@@ -41,7 +41,7 @@ int main(int argc , char *argv[])
 	//Create server socket
 	socket_desc = socket(AF_INET , SOCK_STREAM , 0);
 	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_addr.s_addr = inet_addr(argv[1]);;
 	server.sin_port = htons( 8888 );
      
 	if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
