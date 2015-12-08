@@ -6,6 +6,7 @@
 #include "utils.h"
 
 int checkMessage(char message[]);
+void sig_handler(int signo);
 int bal=0;
 int err=0;
  
@@ -14,7 +15,12 @@ int main(int argc , char *argv[])
 	int sock;
 	struct sockaddr_in server;
 	char message[1000] , server_reply[2000];
-     
+
+        if (signal(SIGINT, sig_handler) == SIG_ERR)
+        printf("\ncan't catch SIGINT\n");
+ 
+
+
 	//Create socket
 	sock = socket(AF_INET , SOCK_STREAM , 0);
 	if (sock == -1)
@@ -146,7 +152,11 @@ int main(int argc , char *argv[])
 	close(sock);
 	return 0;
 }
-
+void sig_handler(int signo)
+{
+        if (signo == SIGINT)
+                exit(1);
+}
 int checkMessage(char message[]){
 
 	char mess[100];

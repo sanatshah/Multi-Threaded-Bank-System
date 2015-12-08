@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<signal.h>
 #include<string.h>    
 #include<stdlib.h>    
 #include<sys/socket.h>
@@ -20,14 +21,18 @@ char* startAcct(char* fullCommand, char* incomData);
 char* getBalance(char* fullCommand, char* incomData);
 char* getSecondPart(char* fullCommand);
 char* testNumb="test";
+void sig_handler(int signo); 
 
 int openingAccount;
 acctManager control;
 pthread_mutex_t fullStructLock = PTHREAD_MUTEX_INITIALIZER;
 acnt tracker[20];
-
+int beingPrinted=0;
 int main(int argc , char *argv[])
 {
+ 	if (signal(SIGINT, sig_handler) == SIG_ERR)
+  	printf("\ncan't catch SIGINT\n");
+
 	int socket_desc , client_sock , c , *new_sock;
 	struct sockaddr_in server , client;
 	openingAccount = 0;
@@ -70,6 +75,7 @@ int main(int argc , char *argv[])
 	//accept new client connection and make thread
 	while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )	
 	{
+		printf("Connection from client\n");
 		pthread_t sniffer_thread;
 		new_sock = malloc(1);
 		*new_sock = client_sock;
@@ -85,6 +91,11 @@ int main(int argc , char *argv[])
      
     return 0;
 } 
+void sig_handler(int signo)
+{
+	if (signo == SIGINT)
+		exit(1);
+}
 
 void printAccounts(){
 	acnt acntptr; 
@@ -113,6 +124,8 @@ void printAccounts(){
 		
 		do{ 
 
+			beingPrinted=1;
+
 			char* shortName=strtok(acntptr->name," "); 
 			if(acntptr->isf){ 
 				printf(GREEN "---------------------------------------------------\n" RESET);
@@ -135,6 +148,7 @@ void printAccounts(){
 			acntptr=acntptr->next;
 
 		}while(acntptr!=NULL);
+		beingPrinted=0;
 		printf("\n");
 		printf("\n");
 		printf("\n");
@@ -506,6 +520,25 @@ char* openAcct(char* fullCommand, char* incomData){
 		}
 		}
 	} */
+
+
+	//check to see if accounts are beign printed 
+	if (beingPrinted) {
+
+		error="Accounts being printed. Please try again.";
+
+		// add error to buffer
+		int x=0;	
+		for(x;x<strlen(error);x++){
+			//*(incomData+8+x) = *(error+x);
+			incomData[8+x] = error[x];
+		}
+
+		return incomData;
+
+	}
+
+
 
 	//try adding it to the list
 	
