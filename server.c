@@ -10,6 +10,7 @@
 #include "utils.h"
  
 void *clientHandler(void *);
+void printAccounts();
 char* handleCommand(char* command, acnt currAcct, char* incomData);
 char* creditAcct(char* fullCommand, char* incomData);
 char* finishAcct(char* fullCommand, char* incomData);
@@ -57,6 +58,10 @@ int main(int argc , char *argv[])
 	control->error = 0; 
 	control->trackerCounter=0;
 
+	//began printing server stuff/ in separate thread
+	pthread_t serverTimer; 
+	pthread_create (&serverTimer, NULL, (void *) printAccounts, NULL);
+
      
 	//Accept and incoming connection
 	puts("Waiting for incoming connections...");
@@ -81,6 +86,60 @@ int main(int argc , char *argv[])
 	}
      
     return 0;
+} 
+
+void printAccounts(){
+	acnt acntptr; 
+	
+	while(1){
+	sleep(5); 
+
+		if(control->numAccts==0) {
+			printf("\n");
+			printf("\n");
+			printf("No accounts exist.\n");
+			printf("\n");
+			printf("\n");
+			continue;
+		}else {
+
+			acntptr=control->head;
+
+			printf("\n");
+			printf("\n");
+			printf("\n");
+			printf(GREEN "Current Accounts....\n" RESET);
+		}
+		
+		
+		do{ 
+
+			char* shortName=strtok(acntptr->name," "); 
+			if(acntptr->isf){ 
+				printf("Account Name --------- %s", shortName); 
+				printf("Balance -------------- %f\n", acntptr->balance);
+				printf("------IN SERVICE------ \n"); 
+			} else {
+				printf("Account Name --------- %s\n", shortName); 
+				printf("Balance -------------- %f\n", acntptr->balance);
+			}
+
+			printf("\n");
+			printf("\n");
+			printf("\n");
+
+			acntptr=acntptr->next;
+
+		}while(acntptr!=NULL);
+		printf("\n");
+		printf("\n");
+		printf("\n");
+		printf("\n");
+
+
+	}
+
+
 } 
 
 char* finishAcct(char* fullCommand, char* incomData){
@@ -374,12 +433,12 @@ char* startAcct(char* fullCommand, char* incomData){
 		}
 	} 
 
-//	  pthread_mutex_lock(&fullStructLock);
+	  pthread_mutex_lock(&fullStructLock);
 
 	acnt foundAcct = find(control, secondPart); 
 	puts("after find call");
 
-//	  pthread_mutex_unlock(&fullStructLock);
+	  pthread_mutex_unlock(&fullStructLock);
 	//account doesn't exist
 	if (foundAcct==NULL){
 		error="Account doesn't exist";
@@ -404,7 +463,7 @@ char* startAcct(char* fullCommand, char* incomData){
 			tracker[x]=foundAcct;
 			control->trackerCounter++;
 			foundAcct->trackerID = control->trackerCounter;	
-
+			foundAcct->isf=1;
 			char id[8]; 
 			sprintf(id, "%d", foundAcct->trackerID);
 
@@ -461,7 +520,10 @@ char* openAcct(char* fullCommand, char* incomData){
 	} */
 
 	//try adding it to the list
+	
+	pthread_mutex_lock(&fullStructLock);
 	control=add(control, name);
+	pthread_mutex_unlock(&fullStructLock);
 	if (control->error==1) { 
 		printf("Error: %s\n", control->errorMessage);
 	
