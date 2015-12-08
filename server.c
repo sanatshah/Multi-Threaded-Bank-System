@@ -70,7 +70,6 @@ int main(int argc , char *argv[])
 	//accept new client connection and make thread
 	while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )	
 	{
-		puts("Connection accepted");
 		pthread_t sniffer_thread;
 		new_sock = malloc(1);
 		*new_sock = client_sock;
@@ -80,7 +79,6 @@ int main(int argc , char *argv[])
 			perror("could not create thread");
 			return 1;
 		}else {
-			printf("New Thread Created");
 		}
          
 	}
@@ -108,7 +106,8 @@ void printAccounts(){
 			printf("\n");
 			printf("\n");
 			printf("\n");
-			printf(GREEN "Current Accounts....\n" RESET);
+			printf(YELLOW "Current Accounts....\n" RESET);
+			printf("\n");
 		}
 		
 		
@@ -116,22 +115,26 @@ void printAccounts(){
 
 			char* shortName=strtok(acntptr->name," "); 
 			if(acntptr->isf){ 
-				printf("Account Name --------- %s", shortName); 
-				printf("Balance -------------- %f\n", acntptr->balance);
-				printf("------IN SERVICE------ \n"); 
+				printf(GREEN "---------------------------------------------------\n" RESET);
+				printf("Account Name --------- %s\n", shortName); 
+				printf("Balance -------------- %f\n\n", acntptr->balance);
+				printf("------"); 
+				printf(RED "IN SERVICE" RESET);
+				printf("------ \n"); 
+				printf(GREEN "---------------------------------------------------\n" RESET);
 			} else {
+				printf(GREEN "---------------------------------------------------\n" RESET);
 				printf("Account Name --------- %s\n", shortName); 
 				printf("Balance -------------- %f\n", acntptr->balance);
+				printf(GREEN "---------------------------------------------------\n" RESET);
 			}
 
-			printf("\n");
 			printf("\n");
 			printf("\n");
 
 			acntptr=acntptr->next;
 
 		}while(acntptr!=NULL);
-		printf("\n");
 		printf("\n");
 		printf("\n");
 		printf("\n");
@@ -155,7 +158,6 @@ char* finishAcct(char* fullCommand, char* incomData){
 
 	int trackID = atoi(trackerID);
 
-	printf("Tracker ID is %d\n",trackID);
 
 
 	//if trackerID there is no started account
@@ -184,6 +186,7 @@ char* finishAcct(char* fullCommand, char* incomData){
 
 	tracker[y]=NULL;
 	clientAcnt->trackerID=0;
+	clientAcnt->isf = 0;
 	
 	char id[8]; 
 	sprintf(id, "%d", clientAcnt->trackerID);
@@ -209,7 +212,6 @@ char* getBalance(char* fullCommand, char* incomData){
 
 	int trackID = atoi(trackerID);
 
-	printf("Tracker ID is %d\n",trackID);
 
 	//if trackerID there is no started account
  	if (trackID==0) {
@@ -265,7 +267,6 @@ char* debitAcct(char* fullCommand, char* incomData){
 
 	int trackID = atoi(trackerID);
 
-	printf("Tracker ID is %d\n",trackID);
 
 	//if trackerID there is no started account
  	if (trackID==0) {
@@ -327,7 +328,6 @@ char* debitAcct(char* fullCommand, char* incomData){
 
 	}
 
-        printf("Current Balance for %s is %f\n",clientAcnt->name, clientAcnt->balance);
 
 
 
@@ -346,7 +346,6 @@ char* creditAcct(char* fullCommand, char* incomData){
 
 	int trackID = atoi(trackerID);
 
-	printf("Tracker ID is %d\n",trackID);
 
 	//check if there is a started account linked to this client	
 	if (trackID==0) {
@@ -393,7 +392,6 @@ char* creditAcct(char* fullCommand, char* incomData){
 
 	clientAcnt->balance=clientAcnt->balance+creditAmount;
 
-	printf("Current Balance for %s is %f\n",clientAcnt->name, clientAcnt->balance);
 	
 	
 		
@@ -415,13 +413,11 @@ char* startAcct(char* fullCommand, char* incomData){
 
 	int trackID = atoi(trackerID);
 
-	puts("in start account");
 	//check if account already in session
 	for(x;x<20;x++){
 		if(tracker[x]!=NULL){
-		if(trackID==tracker[x]->trackerID){ 
+		if((trackID==tracker[x]->trackerID)||(strncmp(secondPart,tracker[x]->name, strlen(secondPart)-2)==0)){ 
 			error="Account already in session.";			
-			puts("in first ifthen");	
 			// add error to buffer
 			int x=0;	
 			for(x;x<strlen(error);x++){
@@ -436,7 +432,6 @@ char* startAcct(char* fullCommand, char* incomData){
 	  pthread_mutex_lock(&fullStructLock);
 
 	acnt foundAcct = find(control, secondPart); 
-	puts("after find call");
 
 	  pthread_mutex_unlock(&fullStructLock);
 	//account doesn't exist
@@ -445,11 +440,9 @@ char* startAcct(char* fullCommand, char* incomData){
 
 		// add error to buffer
 		int x=0;	
-		printf("!!!!!!!ERROR: \n");
 		for(x;x<strlen(error);x++){
 			//*(incomData+8+x) = *(error+x);
 			incomData[8+x] = error[x];
-			printf("%c\n", incomData[8+x]);
 		}
 
 		return incomData;
@@ -458,7 +451,6 @@ char* startAcct(char* fullCommand, char* incomData){
 
 	//account is found, start it 
 	for(x=0;x<20;x++){
-		puts("in accout is found");
 		if(tracker[x]==NULL) {
 			tracker[x]=foundAcct;
 			control->trackerCounter++;
@@ -466,9 +458,6 @@ char* startAcct(char* fullCommand, char* incomData){
 			foundAcct->isf=1;
 			char id[8]; 
 			sprintf(id, "%d", foundAcct->trackerID);
-
-			printf("id is %s\n", id); 
-			printf("id is %d\n", foundAcct->trackerID); 
 
 			int y=0; 
 			for(y;y<8;y++) {
@@ -498,11 +487,10 @@ char* openAcct(char* fullCommand, char* incomData){
 
 	char name[50];
 	strcpy(name,getSecondPart(fullCommand));	
-	printf("%s",name);
 	
 	int x=0;
 	char* error;
-	//check if account already in session
+	//check if account already in session DEPRECIATED!!!!!!!!
 	/*for(x;x<20;x++){
 		if(tracker[x]!=NULL){
 		if(trackID==tracker[x]->trackerID){ 
@@ -525,7 +513,6 @@ char* openAcct(char* fullCommand, char* incomData){
 	control=add(control, name);
 	pthread_mutex_unlock(&fullStructLock);
 	if (control->error==1) { 
-		printf("Error: %s\n", control->errorMessage);
 	
 		// add error to buffer
 		int x=0;	
@@ -551,7 +538,6 @@ char* getSecondPart(char* fullCommand){
 
 char* handleCommand(char* fullCommand, acnt currAcct, char* incomData){
 
-	puts("seg fault check");
 
 	char mess[100]; 
 	strcpy(mess,fullCommand); 
@@ -611,12 +597,10 @@ void *clientHandler(void *socket_desc)
 
 	char* client_data = (char *) malloc(104);
 
-	puts("in clientHandler");	
 
 	//communication with client
 	while( (read_size = recv(sock , client_data , 104 , 0)) > 0 )
 	{
-		puts("seg check");
 		//deserialize data
 		char* incomData= (char *) malloc(104);
 		memcpy(incomData, client_data, 104); 
@@ -625,12 +609,10 @@ void *clientHandler(void *socket_desc)
 		char message[50];
 		int x=0; 
 
-		puts("seg check");
 		for(x;x<50;x++){
 			message[x]=*(incomData+54+x);
 		}
 
-		puts("seg check");
 		//get pointer 
 		acnt account=NULL;
 

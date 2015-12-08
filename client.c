@@ -48,6 +48,7 @@ int main(int argc , char *argv[])
 		bal=0;
 		err=0;
 		printf(GREEN "> " RESET);
+		sleep(2);
 		fgets(message,50, stdin);
 
 		if(!checkMessage(message)) 

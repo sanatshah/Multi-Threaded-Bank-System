@@ -59,7 +59,6 @@ acctManager add(acctManager control, char* name) {
 
 acnt find(acctManager control, char* name){
 	int check=0;
-	puts("in find");
 	if (control->numAccts == 0) { 
 		acnt acntptr=NULL;
 		return acntptr;
@@ -68,13 +67,10 @@ acnt find(acctManager control, char* name){
 	acnt acntptr=control->head;
 
 	do { 
-		printf("stuck in while %s and %zu\n", name, strlen(name));
-		printf("stuck in while %s and %zu\n", acntptr->name, strlen(acntptr->name));
 
 		if (strlen(name)<strlen(acntptr->name)){
 
 		if(strncmp(name, acntptr->name, 3)==0) {
-			puts("found ptr");
 			return acntptr;
 		}
 
@@ -82,7 +78,6 @@ acnt find(acctManager control, char* name){
 
 
 		if(strncmp(name, acntptr->name, 3)==0) {
-			puts("found ptr");
 			return acntptr;
 		}
 
@@ -93,7 +88,6 @@ acnt find(acctManager control, char* name){
 	}
 	while (acntptr!=NULL);
 
-	puts("bout ot return null");
 	acntptr=NULL;
 	return acntptr;
 

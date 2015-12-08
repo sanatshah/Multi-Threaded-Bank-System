@@ -1,13 +1,12 @@
-print function timer 
-inservice accounts 
-other timer stuff 
 new accounts cannot be opened while bank is printing 
 signals 
 truncate float
+adding floasts
 client program connect attempts 
 client connect command line 
-command entry throttle 
 characters 100 
+start same account on two different clients
+asynchronous
 
 
 
