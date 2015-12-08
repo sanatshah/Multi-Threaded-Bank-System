@@ -85,9 +85,48 @@ int main(int argc , char *argv[])
 
 char* finishAcct(char* fullCommand, char* incomData){
 
+	char trackerID[8]; 
+	int y=0; 
+	char* error;
+
+	//grab the trackerID 
+	for(y;y<8;y++){
+		trackerID[y]=incomData[y];
+	}
+
+	int trackID = atoi(trackerID);
+
+	printf("Tracker ID is %d\n",trackID);
 
 
+	//if trackerID there is no started account
+ 	if (trackID==0) {
 
+                error="Not in customer session.";
+                // add error to buffer
+                int x=0;
+                for(x;x<strlen(error);x++){
+                        *(incomData+8+x) = *(error+x);
+                }
+
+                return incomData;
+        }
+
+	//trackID exists, account is started, find node
+
+        acnt clientAcnt;
+        for(y=0;y<20;y++){
+
+                if(tracker[y]->trackerID == trackID) {
+                        clientAcnt=tracker[y];
+                        break;
+                }
+        } 
+
+	tracker[y]=NULL;
+	clientAcnt->trackerID=0;
+	
+	return incomData;
 }
 
 char* getBalance(char* fullCommand, char* incomData){
@@ -132,6 +171,7 @@ char* getBalance(char* fullCommand, char* incomData){
 	char balance[25]; 
 	sprintf(balance, "%f", clientAcnt->balance);
 
+	//add balance amount to client return message
 	int x;
 	for(x=0;x<50;x++){
 		*(incomData+54+x) = ' ';
@@ -299,11 +339,20 @@ char* startAcct(char* fullCommand, char* incomData){
 	int x=0; 
 	char* error; 
 
+	char trackerID[8]; 
+	int y=0; 
+
+	for(y;y<8;y++){
+		trackerID[y]=incomData[y];
+	}
+
+	int trackID = atoi(trackerID);
+
 	puts("in start account");
 	//check if account already in session
 	for(x;x<20;x++){
 		if(tracker[x]!=NULL){
-		if (strcmp(secondPart,tracker[x]->name)==0){ 
+		if(trackID==tracker[x]->trackerID){ 
 			error="Account already in session.";			
 			puts("in first ifthen");	
 			// add error to buffer
@@ -362,11 +411,39 @@ char* startAcct(char* fullCommand, char* incomData){
 }
 
 char* openAcct(char* fullCommand, char* incomData){ 
-	pthread_mutex_lock(&fullStructLock);
-	
+
+	//get client trackign information	
+	char trackerID[8]; 
+	int y=0; 
+
+	for(y;y<8;y++){
+		trackerID[y]=incomData[y];
+	}
+
+	int trackID = atoi(trackerID);
+
 	char name[50];
 	strcpy(name,getSecondPart(fullCommand));	
 	printf("%s",name);
+	
+	int x=0;
+	char* error;
+	//check if account already in session
+	for(x;x<20;x++){
+		if(tracker[x]!=NULL){
+		if(trackID==tracker[x]->trackerID){ 
+			error="Account already in session.";			
+			puts("in first ifthen");	
+			// add error to buffer
+			int x=0;	
+			for(x;x<strlen(error);x++){
+				*(incomData+8+x) = *(error+x);
+			}
+
+			return incomData;
+		}
+		}
+	} 
 
 	//try adding it to the list
 	control=add(control, name);
@@ -382,10 +459,6 @@ char* openAcct(char* fullCommand, char* incomData){
 		control->error = 0; 
 	}
 
-	pthread_mutex_unlock(&fullStructLock);	
-
-	acnt temp = control->head; 
-	printf("test %s\n", temp->name);
 	return incomData;
 } 
 
