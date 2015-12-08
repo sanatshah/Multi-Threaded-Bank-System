@@ -6,6 +6,8 @@
 #include "utils.h"
 
 int checkMessage(char message[]);
+int bal=0;
+int err=0;
  
 int main(int argc , char *argv[])
 {
@@ -43,13 +45,17 @@ int main(int argc , char *argv[])
 	//keep communicating with server
 	while(1)
 	{
-		printf("> ");
-
+		bal=0;
+		err=0;
+		printf(GREEN "> " RESET);
 		fgets(message,50, stdin);
 
 		if(!checkMessage(message)) 
 		{
-			puts("Please enter proper syntax."); 
+			printf("\n");
+			printf(RED "Please enter proper syntax." RESET); 
+			printf("\n");
+			printf("\n");
 			continue;
 		} 
 
@@ -63,6 +69,7 @@ int main(int argc , char *argv[])
 	
 			*(buffer+54+x) = *(message+x);
 		}
+	
 
 		//Send buffer to server
 		if( send(sock , buffer , 104 , 0) < 0)
@@ -87,6 +94,50 @@ int main(int argc , char *argv[])
  		}
 
         	trackerID = atoi(trckerID);
+		char error[42]; 
+		for(y=0;y<42;y++){
+
+			if (y==0) 
+				printf("\n");
+			error[y]=rbuffer[8+y];
+		
+			if ((rbuffer[8+y]==' ')&&(rbuffer[9+y]==' ')) {
+
+
+			} else {
+				err=1;
+				printf(RED "%c" RESET,rbuffer[8+y]);
+			}
+		
+			if((y==41)&&(!bal)&&(err)){ 
+				printf("\n");	
+				printf("\n");	
+			}else if ((y==41)&&(bal)){ 
+			}
+		}
+	
+
+		if(!err) {
+
+			printf(GREEN "Command executed without errors.\n" RESET); 
+			printf("\n"); 
+		}
+		
+
+		if ((bal)&&(!err)) { 
+			printf("\n");	
+
+		char balance[42]; 
+		printf("$");
+		for(y=0;y<50;y++){
+
+			printf("%c",rbuffer[54+y]);
+		}
+		printf("\n");
+		printf("\n");
+
+
+		}
 	
          
 	}
@@ -116,6 +167,9 @@ int checkMessage(char message[]){
 
  	char balance[50];
  	strcpy(balance, "balance");
+	if (strncmp(command, balance,7)==0)
+		bal=1;
+
 
  	char finish[50];
  	strcpy(finish, "finish");
@@ -125,7 +179,7 @@ int checkMessage(char message[]){
 
 	int check=0;
 
-	if ((strcmp(command,open)==0)||(strcmp(command,start)==0)||(strcmp(command,credit)==0)||(strcmp(command,debit)==0)||(strcmp(command,balance)==0)||(strcmp(command,finish)==0)||(strcmp(command,exit)==0)) 
+	if ((strcmp(command,open)==0)||(strcmp(command,start)==0)||(strcmp(command,credit)==0)||(strcmp(command,debit)==0)||(strncmp(command,balance,7)==0)||(strcmp(command,finish)==0)||(strcmp(command,exit)==0)) 
 		check=1;
 
 	if (check) 

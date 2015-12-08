@@ -9,6 +9,11 @@
 #include <errno.h>
 #include <pthread.h>
 
+#define RED "\033[31m"
+#define RESET   "\033[0m"
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m" 
 
 typedef struct acct* acnt;
 struct acct{

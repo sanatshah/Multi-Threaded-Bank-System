@@ -3,6 +3,15 @@
 acctManager add(acctManager control, char* name) {
 	acctManager controlSave = control; 
 
+	//check if name is already opened 
+	if (find(controlSave, name)!=NULL){
+
+		controlSave->error=1; 
+		strcpy(controlSave->errorMessage, "Name already exists");
+		return controlSave;
+
+	}
+
 	//first account
 	if (controlSave->head==NULL) {
 
@@ -28,6 +37,7 @@ acctManager add(acctManager control, char* name) {
 		return controlSave;
 	}
 
+
 	//else add a new accoutn to the front
 	acnt temp = controlSave->head; 
 	acnt newAcct = (acnt)malloc(sizeof(acnt)); 
@@ -51,7 +61,8 @@ acnt find(acctManager control, char* name){
 	int check=0;
 	puts("in find");
 	if (control->numAccts == 0) { 
-		return NULL;
+		acnt acntptr=NULL;
+		return acntptr;
 	} 
 
 	acnt acntptr=control->head;
@@ -82,7 +93,7 @@ acnt find(acctManager control, char* name){
 	}
 	while (acntptr!=NULL);
 
-
+	puts("bout ot return null");
 	acntptr=NULL;
 	return acntptr;
 

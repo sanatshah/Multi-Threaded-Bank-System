@@ -126,6 +126,14 @@ char* finishAcct(char* fullCommand, char* incomData){
 	tracker[y]=NULL;
 	clientAcnt->trackerID=0;
 	
+	char id[8]; 
+	sprintf(id, "%d", clientAcnt->trackerID);
+	y=0; 
+	for(y;y<8;y++) {
+		incomData[y]=id[y];
+
+	}
+
 	return incomData;
 }
 
@@ -366,17 +374,23 @@ char* startAcct(char* fullCommand, char* incomData){
 		}
 	} 
 
+//	  pthread_mutex_lock(&fullStructLock);
 
 	acnt foundAcct = find(control, secondPart); 
+	puts("after find call");
 
+//	  pthread_mutex_unlock(&fullStructLock);
 	//account doesn't exist
 	if (foundAcct==NULL){
 		error="Account doesn't exist";
 
 		// add error to buffer
 		int x=0;	
+		printf("!!!!!!!ERROR: \n");
 		for(x;x<strlen(error);x++){
-			*(incomData+8+x) = *(error+x);
+			//*(incomData+8+x) = *(error+x);
+			incomData[8+x] = error[x];
+			printf("%c\n", incomData[8+x]);
 		}
 
 		return incomData;
@@ -406,6 +420,7 @@ char* startAcct(char* fullCommand, char* incomData){
 			return incomData;			
 		}
 	}
+
 	
 	return NULL;
 }
@@ -429,7 +444,7 @@ char* openAcct(char* fullCommand, char* incomData){
 	int x=0;
 	char* error;
 	//check if account already in session
-	for(x;x<20;x++){
+	/*for(x;x<20;x++){
 		if(tracker[x]!=NULL){
 		if(trackID==tracker[x]->trackerID){ 
 			error="Account already in session.";			
@@ -443,7 +458,7 @@ char* openAcct(char* fullCommand, char* incomData){
 			return incomData;
 		}
 		}
-	} 
+	} */
 
 	//try adding it to the list
 	control=add(control, name);
@@ -511,7 +526,7 @@ char* handleCommand(char* fullCommand, acnt currAcct, char* incomData){
 		incomData=creditAcct(fullCommand, incomData);
 	} else if (strcmp(command, debit)==0) {
 		incomData=debitAcct(fullCommand, incomData);
-	} else if (strcmp(command, balance)==0){
+	} else if (strncmp(command, balance,7)==0){
 		incomData=getBalance(fullCommand, incomData);
 	} else if (strcmp(command, finish)==0) {
 		incomData=finishAcct(fullCommand, incomData);
@@ -557,6 +572,9 @@ void *clientHandler(void *socket_desc)
 		//get pointer 
 		acnt account=NULL;
 
+		for(x=0;x<50;x++){
+			*(incomData+8+x) = ' ';
+		}
 
 		//send data to command handler function 
 		incomData=handleCommand(message, account, incomData);
