@@ -3,11 +3,11 @@
 
 #include "utils.h"
 
-acctManager add(acctManager man);
+acctManager add(acctManager control, char* name);
 
-void find(acctManager man); 
+acnt find(acctManager control, char* name); 
 
-void print();
+void print(acctManager control);
 
 
 #endif

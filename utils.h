@@ -14,13 +14,19 @@ typedef struct acct* acnt;
 struct acct{
 	char* name;
 	float balance;
-	int isf; 
+	int isf;  
+	int error; 
+	char errorMessage[50];
+	int trackerID;
 	acnt next;	
 };
 
 struct manager{
 	acnt head;
 	int numAccts; 
+	int error; 
+	char errorMessage[50];
+	int trackerCounter;
 };
 typedef struct manager* acctManager;
 

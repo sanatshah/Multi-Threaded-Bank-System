@@ -33,47 +33,62 @@ int main(int argc , char *argv[])
      
 	printf("Connected to server...\n");
 
-	//prepare struct for sending data to server 
-	dataInfo info = (dataInfo) malloc(sizeof(dataInfo));
-	info->acctPtr = NULL;
-	info->command=(char*) malloc(100);
-    	strcpy(info->command, "testing data serialization"); 
-	info->message= NULL;
+	//create buffer of information to be sent to server 
 
-	unsigned char* data=NULL;
+	char* buffer = (char *) malloc(104); 
+	char* rbuffer = (char *) malloc(104); 
+	int x=0; 
+	int trackerID=0;
 
 	//keep communicating with server
 	while(1)
 	{
 		printf("> ");
 
-		fgets(message,100, stdin);
+		fgets(message,50, stdin);
 
 		if(!checkMessage(message)) 
 		{
 			puts("Please enter proper syntax."); 
 			continue;
 		} 
+
+		//add command to buffer
+		for(x=0;x<50;x++){
 	
-		data=(unsigned char*) malloc(sizeof(struct dataInfo)); 	
-		memcpy(data, info, sizeof(struct dataInfo));
-        	printf("sizeof data = %zu\n",sizeof(data)); 
-		//Send command to server
-		if( send(sock , data , sizeof(struct dataInfo) , 0) < 0)
+			*(buffer+54+x) = ' ';
+		}
+
+		for(x=0;x<strlen(message);x++){
+	
+			*(buffer+54+x) = *(message+x);
+		}
+
+		//Send buffer to server
+		if( send(sock , buffer , 104 , 0) < 0)
 		{
 			puts("Send failed");
 			return 1;
 		}
-         
-		//Receive information from server
-		if( recv(sock , server_reply , 2000 , 0) < 0)
+
+		//recieve buffer from server
+		if( recv(sock , rbuffer , 2000 , 0) < 0)
 		{
-			puts("recv failed");
+ 			puts("recv failed");
 			break;
-		}
+		} 
+
+		char trckerID[8];
+        	int y=0;
+
+        	for(y;y<8;y++){
+                	trckerID[y]=rbuffer[y];
+			buffer[y]=rbuffer[y];
+ 		}
+
+        	trackerID = atoi(trckerID);
+	
          
-		puts("Server reply :");
-		puts(server_reply);
 	}
      
 	close(sock);
