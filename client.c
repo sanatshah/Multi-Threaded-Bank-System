@@ -11,10 +11,10 @@ int checkMessage(char message[]);
 void sig_handler(int signo);
 int bal=0;
 int err=0;
- 
+int sock;
+char* buffer;
 int main(int argc , char *argv[])
 {
-	int sock;
 	struct sockaddr_in server;
 	char message[1000] , server_reply[2000];
 
@@ -58,7 +58,7 @@ int main(int argc , char *argv[])
 
 	//create buffer of information to be sent to server 
 
-	char* buffer = (char *) malloc(104); 
+	buffer = (char *) malloc(104); 
 	char* rbuffer = (char *) malloc(104); 
 	int x=0; 
 	int trackerID=0;
@@ -141,7 +141,7 @@ int main(int argc , char *argv[])
 
 		if(!err) {
 
-			printf(GREEN "Command executed without errors.\n" RESET); 
+			printf(GREEN "Command executed.\n" RESET); 
 			printf("\n"); 
 		}
 		
@@ -169,8 +169,26 @@ int main(int argc , char *argv[])
 }
 void sig_handler(int signo)
 {
-        if (signo == SIGINT)
+        if (signo == SIGINT){
+		int x; 
+		char* message="finish ";
+
+		for(x=0;x<50;x++){
+	
+			*(buffer+54+x) = ' ';
+		}
+
+		for(x=0;x<strlen(message);x++){
+	
+			*(buffer+54+x) = *(message+x);
+		}
+
+	send(sock , buffer , 104 , 0);
+
                 exit(1);
+
+
+	}
 }
 int checkMessage(char message[]){
 
